@@ -1,0 +1,116 @@
+# No squealing.
+server_tokens off;
+
+# OpenNebula Sunstone upstream
+upstream sunstone {
+  server 127.0.0.1:9869;
+}
+# OpenNebula websocketproxy upstream
+upstream websocketproxy {
+  server 127.0.0.1:29876;
+}
+
+# HTTP virtual host, redirect to HTTPS
+server {
+    listen 80 default_server;
+    return 301 https://$server_name:443;
+}
+
+#
+# Example Sunstone configuratuion
+#
+#:vnc_proxy_port: 127.0.0.1:29876
+#:vnc_proxy_support_wss: only
+#:vnc_proxy_cert: /etc/letsencrypt/live/frontend/fullchain.pem
+#:vnc_proxy_key: /etc/letsencrypt/live/frontend/privkey.pem
+#:vnc_proxy_ipv6: false
+#:vnc_request_password: false
+#:vnc_client_port: 443
+
+# HTTPS virtual host, proxy to Sunstone
+server {
+    listen 443 ssl;
+    listen [::]:443 ssl;
+    server_name frontend;
+    root         /usr/share/nginx/html;
+
+    error_page 404 /404.html;
+        location = /40x.html {
+    }
+    error_page 500 502 503 504 /50x.html;
+        location = /50x.html {
+    }
+
+    location / {
+        # Handle inconsistency in the websockify URLs provided by Sunstone
+        if ($args ~* "host=.+&port=.+&token=.+&encrypt=.*") {
+            rewrite ^/$ /websockify/ last;
+        }
+        proxy_pass http://sunstone;
+        proxy_redirect     off;
+        log_not_found      off;
+        proxy_set_header   X-Real-IP $remote_addr;
+        proxy_set_header   Host $http_host;
+        proxy_set_header   X-Forwarded-FOR $proxy_add_x_forwarded_for;
+    }
+    
+    location /websockify {
+        proxy_http_version 1.1;
+        proxy_pass https://websocketproxy;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection "upgrade";
+        proxy_read_timeout 61s;
+        proxy_buffering off;
+    }
+
+    ssl_certificate     /etc/letsencrypt/live/frontend/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/frontend/privkey.pem;
+    ssl_stapling on;
+}
+
+##
+## OpenNebula XML-RPC proxy (optional)
+##
+upstream onexmlrpc {
+  server 127.0.0.1:2633;
+}
+upstream vncxmlrpc {
+  server 127.0.0.1:2644;
+}
+server {
+    listen       2634 ssl;
+     listen       [::]:2634 ssl;
+    server_name  frontend;
+    root         /usr/share/nginx/html;
+
+    error_page 404 /404.html;
+        location = /40x.html {
+    }
+    error_page 500 502 503 504 /50x.html;
+        location = /50x.html {
+    }
+
+    location / {
+        proxy_http_version 1.1;
+        proxy_pass http://onexmlrpc;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection "upgrade";
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header Host $http_host;
+        proxy_read_timeout 180s;
+        proxy_buffering off;
+    }
+    location /RPC2/vnctoken {
+        proxy_http_version 1.1;
+        proxy_pass http://vncxmlrpc;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection "upgrade";
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header Host $http_host;
+        proxy_buffering off;
+    }
+
+    ssl_certificate /etc/letsencrypt/live/frontend/fullchain.pem; # managed by Certbot
+    ssl_certificate_key /etc/letsencrypt/live/frontend/privkey.pem; # managed by Certbot
+    ssl_stapling on;
+}

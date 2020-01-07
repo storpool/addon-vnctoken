@@ -1,0 +1,18 @@
+delaycompress
+dateext
+dateformat -%Y%m%d-%s
+
+compress
+weekly
+rotate 52
+
+/var/log/one/vnctoken.log {
+   missingok
+   notifempty
+   copytruncate
+}
+/var/log/one/vnctoken.error {
+   missingok
+   notifempty
+   copytruncate
+}
