@@ -142,8 +142,8 @@ helpers do
         #logger.debug { "Request:#{data}" }
 
         method = data[0]
-        if method != 'one.vm.vnc'
-            return [0x1000, "Unknown method '#{method}'. Expected 'one.vm.vnc'"]
+        if method != 'one.vm.vnctoken'
+            return [0x1000, "Unknown method '#{method}'. Expected 'one.vm.vnctoken'"]
         end
 
         auth = data[1][0]

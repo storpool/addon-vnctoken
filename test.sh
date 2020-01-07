@@ -12,7 +12,7 @@ ONE_VNC=${ONE_VNC:-http://127.0.0.1:2644/RPC2}
 curl -H "Content-Type: text/xml" -X GET \
   -d "<?xml version='1.0'?>
       <methodCall>
-        <methodName>one.vm.vnc</methodName>
+        <methodName>one.vm.vnctoken</methodName>
         <params>
           <param>
             <value><string>$ONE_AUTH_STRING</string></value>
