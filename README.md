@@ -1,5 +1,5 @@
 # addon-vnctoken
-OpenNebula addon to provide VNC tokens for websocketproxy
+OpenNebula addon to provide VNC tokens for websocketproxy via dedicated XML-RPC api endpoint
 
 ## Introduction
 
@@ -28,9 +28,9 @@ sudo systemctl restart opennebula-sunstone
 
 ## Usage
 
-With the default configuration the service is listening on localhost, port 2644. The endpoint URL is http://localhost:2644/RPC2
+With the default configuration the service is listening on localhost, port 2644. The endpoint URL is http://localhost:2644/RPC2.
 
-The XMLRPC endpoint is serving the following methods:
+The XMLRPC endpoint is serving the following methods via both POST and GET requests:
 
 ### one.vm.vnctoken
 
