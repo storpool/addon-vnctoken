@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 # -------------------------------------------------------------------------- #
-# Copyright 2019, StorPool                                                   #
+# Copyright 2019-2020, StorPool                                              #
 # Portions copyright OpenNebula Project, OpenNebula Systems                  #
 #                                                                            #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may    #
@@ -58,6 +58,15 @@ require 'CloudServer'
 require 'opennebula'
 
 include OpenNebula
+
+class Hash
+  def to_xml
+    map do |k, v|
+      text = Hash === v ? v.to_xml : v
+      "<%s>%s</%s>" % [k.upcase, text, k.upcase]
+    end.join
+  end
+end
 
 begin
     $conf = YAML.load_file(SUNSTONE_CONF_FILE)
@@ -136,19 +145,7 @@ helpers do
         [0x0000, random_str]
     end
 
-    def proxy_data()
-        #logger.debug { "#{@request_body}" }
-        data = settings.marshal.load_call(@request_body)
-        #logger.debug { "Request:#{data}" }
-
-        method = data[0]
-        if method != 'one.vm.vnctoken'
-            return [0x1000, "Unknown method '#{method}'. Expected 'one.vm.vnctoken'"]
-        end
-
-        auth = data[1][0]
-        vm_id = data[1][1]
-
+    def get_vm_data(auth, vm_id)
         begin
             client = OpenNebula::Client.new(auth, settings.conf[:one_xmlrpc])
         rescue Exception => e
@@ -199,14 +196,40 @@ helpers do
             err = "Unsupported VM state! STATE:#{vm.state} LCM_STATE:#{vm.lcm_state}"
             return [0x0800, err]
         end
-
         [0x0000, params]
+    end
+
+
+    def process_request()
+        #logger.debug { "#{@request_body}" }
+        data = settings.marshal.load_call(@request_body)
+        #logger.debug { "Request:#{data}" }
+
+        methods = ['one.vm.vnctoken', 'one.vm.vnctokenonly', 'one.vm.vnc']
+        method = data[0]
+        unless methods.include?(method)
+            return [0x1000, "Unknown method '#{method}'. Expected #{methods}"]
+        end
+
+        ret, vmdata = get_vm_data(data[1][0], data[1][1])
+
+        if ret != 0
+            return [ret, vmdata]
+        end
+
+        if method == 'one.vm.vnctokenonly'
+            return [0x0000, vmdata[:token]]
+        elsif method == 'one.vm.vnc'
+            return [0x0000, "<VM>#{vmdata.to_xml}</VM>"]
+        end
+
+        [0x0000, vmdata]
     end
 
 end
 
 get '/RPC2*' do
-    res, data = proxy_data()
+    res, data = process_request()
 
     if res == 0
         response = [true, data, res]
@@ -220,3 +243,17 @@ get '/RPC2*' do
     [200, xmlrpc_response]
 end
 
+post '/RPC2*' do
+    res, data = process_request()
+
+    if res == 0
+        response = [true, data, res]
+    else
+        logger.error { "#{data} //#{res}" }
+        response = [false, data, res]
+    end
+
+    xmlrpc_response = settings.xmlrpc.methodResponse(true, *response)
+
+    [200, xmlrpc_response]
+end
