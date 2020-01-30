@@ -232,10 +232,10 @@ get '/RPC2*' do
     res, data = process_request()
 
     if res == 0
-        response = [true, data, res]
+        response = [[true, data, res]]
     else
         logger.error { "#{data} //#{res}" }
-        response = [false, data, res]
+        response = [[false, data, res]]
     end
 
     xmlrpc_response = settings.xmlrpc.methodResponse(true, *response)
@@ -247,10 +247,10 @@ post '/RPC2*' do
     res, data = process_request()
 
     if res == 0
-        response = [true, data, res]
+        response = [[true, data, res]]
     else
         logger.error { "#{data} //#{res}" }
-        response = [false, data, res]
+        response = [[false, data, res]]
     end
 
     xmlrpc_response = settings.xmlrpc.methodResponse(true, *response)
