@@ -167,7 +167,7 @@ helpers do
             type = vm['TEMPLATE/GRAPHICS/TYPE']
             params[:type] = type.nil? ? '' : type
 
-            if type == 'VNC'
+            if type.upcase == 'VNC'
                 port = vm['TEMPLATE/GRAPHICS/PORT'].to_i
                 params[:port] = port
                 listen = vm['TEMPLATE/GRAPHICS/LISTEN']
