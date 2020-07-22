@@ -1,17 +1,10 @@
-delaycompress
-dateext
-dateformat -%Y%m%d-%s
-
-compress
-weekly
-rotate 52
-
-/var/log/one/vnctoken.log {
-   missingok
-   notifempty
-   copytruncate
-}
-/var/log/one/vnctoken.error {
+/var/log/one/vnctoken.log /var/log/one/vnctoken.error {
+   delaycompress
+   dateext
+   dateformat -%Y%m%d-%s
+   compress
+   weekly
+   rotate 52
    missingok
    notifempty
    copytruncate
