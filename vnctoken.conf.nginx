@@ -17,7 +17,7 @@ server {
 }
 
 #
-# Example Sunstone configuratuion
+# Example Sunstone configuration (/etc/one/sunstone-server.conf)
 #
 #:vnc_proxy_port: 127.0.0.1:29876
 #:vnc_proxy_support_wss: only
