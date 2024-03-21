@@ -1,0 +1,21 @@
+[Unit]
+Description=Websockify noVNC Service
+After=opennebula.service
+After=network.target
+PartOf=opennebula.service
+ReloadPropagatedFrom=opennebula.service
+
+[Service]
+Type=simple
+Group=oneadmin
+User=oneadmin
+EnvironmentFile=/etc/sysconfig/websockify-novnc
+ExecStartPre=-/usr/sbin/logrotate -f /etc/logrotate.d/websockify-novnc -s /var/lib/one/.logrotate.status
+ExecStart=/var/lib/one/websockify-novnc/websockify.py --log-file=/var/log/one/websockify-novnc.log --target-config="${TARGET_CONFIG}" --cert="${CERT}" --key="${KEY}" "${LISTEN}"
+StartLimitInterval=60
+StartLimitBurst=3
+Restart=on-failure
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target

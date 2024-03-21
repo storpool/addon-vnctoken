@@ -1,0 +1,11 @@
+TARGET_CONFIG=/var/lib/one/sunstone_vnc_tokens
+
+# To avoid port cololision,
+# the port should differ from the one defined in the ':vnc_proxy_port:' variable in /etc/one/sunstone-server.conf
+LISTEN=127.0.0.1:29877
+
+# Shold be the same as ':vnc_proxy_cert:' variable in /etc/one/sunstone-server.conf
+CERT=/path/to/ssl/cert.pem
+
+# Shold be the same as ':vnc_proxy_key:' variable in /etc/one/sunstone-server.conf
+KEY=/path/to/ssl/key.pem
