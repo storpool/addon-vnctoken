@@ -181,25 +181,38 @@ A complete nginx configuration example could be found in _vnctoken.conf.nginx_ f
 
 ## noVNC example
 
-In the following example an local nginx is started via docker to serve the noVNC pages. Assuming that the frontend host is with hostname _frontend_ and there is nginx configured to proxy the websocketproxy's _/websockify_ url using plain HTTP.
+In the following example the noVNC reposytory is checked-out in the nginx html root.
 
 ```bash
-cd
-git clone https://github.com/novnc/noVNC
-cd noVNC
+git clone https://github.com/novnc/noVNC /usr/share/nginx/html/noVNC-demo
+cd /usr/share/nginx/html/noVNC-demo
 # the websocketproxy bundled in OpenNebula is relatively old
 # so the code in master branch will not work.
 git checkout -b stable/v0.6 origin/stable/v0.6
-cd ..
-docker pull nginx
-docker run -it --rm -d -p 8080:80 --name noVNC -v ~/noVNC:/usr/share/nginx/html/noVNC nginx
 ```
 
-Generate a new vnc token for a given VM using the example _test.sh_ script or pick already generated one from _/var/lib/one/sunstone-vnc-tokens/one-${VM_ID}_ then open the folling URL in a local browser:
+Add the location handler to the nginx server configuration
 
 ```
-http://localhost:8080/noVNC/vnc_auto.html?host=frontend&port=80&token=6oyvi4lsfn77hlpu73ns&encrypt=no&title=DesiredTitle&password=null
+server {
+    ...
+    location /noVNC-demo {
+        root /usr/share/nginx/html;
+    }
+    ...
+}
 ```
 
-Note: Update the _encrypt_ and _password_ variables if needed.
+And restart the nginx service
+```bash
+systemctl restart nginx
+```
+
+Generate a new vnc token for a given VM using the example _test.sh_ script or pick an actual token from _/var/lib/one/sunstone-vnc-tokens/one-${VM_ID}_(for example `6oyvi4lsfn77hlpu73ns`). Then open the following URL in a local browser:
+
+```
+http://localhost/noVNC-demo/vnc_auto.html?host=frontend&port=80&token=6oyvi4lsfn77hlpu73ns&encrypt=no&title=noVNC_page_Title&password=null
+```
+
+Note: Update the _encrypt_, _title_ and _password_ variables if needed.
 
