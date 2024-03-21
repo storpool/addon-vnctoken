@@ -13,7 +13,7 @@ Copy the content of the _etc_ folder to the system:
 
 ```bash
 cp -va etc/* /etc/
-systemstl daemon-reload
+systemctl daemon-reload
 ```
 
 ## Configuration

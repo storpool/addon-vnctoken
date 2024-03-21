@@ -216,3 +216,7 @@ http://localhost/noVNC-demo/vnc_auto.html?host=frontend&port=80&token=6oyvi4lsfn
 
 Note: Update the _encrypt_, _title_ and _password_ variables if needed.
 
+### using the latest noVNC
+
+To use the latest noVNC a newer websockify is needed. Follow the installation steps [here](websockify-novnc/README.md)
+
