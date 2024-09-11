@@ -6,7 +6,7 @@ set -e -o pipefail
 #    ./test.sh <VMID>
 
 
-ONE_AUTH_STRING="oneadmin:oneadmin"
+ONE_AUTH_STRING="${ONE_AUTH_USER:-oneadmin}:${ONE_AUTH_TOKEN:-oneadmin}"
 ONE_VNC=${ONE_VNC:-http://127.0.0.1:2644/RPC2}
 
 curl -H "Content-Type: text/xml" -X GET \
